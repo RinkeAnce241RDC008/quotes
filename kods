@@ -1,6 +1,6 @@
-import requests
-from bs4 import BeautifulSoup
-from datetime import datetime
+import requests #Ielādē requests bibliotēku, lai veiktu HTTP pieprasījumus
+from bs4 import BeautifulSoup #Ielādē BeautifulSoup HTML datu parsēšanai
+from datetime import datetime #Ielādē datetime datumu formatēšanai un salīdzināšanai
 
 BASE_URL = "https://quotes.toscrape.com"
 
