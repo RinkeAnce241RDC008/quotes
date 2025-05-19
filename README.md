@@ -1,1 +1,1 @@
-# skreipojam-quotes
+	Šis projekts ir Python valodā izstrādāts tīmekļa skrāperis no vietnes https://quotes.toscrape.com. Programma ļauj lietotājam interaktīvi meklēt dažādus citātus pēc autora vai kategorijas, kā arī iegūt detalizētu informāciju par autoriem.
