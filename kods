@@ -20,14 +20,14 @@ def get_all_authors(): #Iegūst autorus no visām lapām
     return sorted(authors) #Atgriež sakārtotu autoru sarakstu
 
 def get_all_tags(): #Iegūst visus tagus no sākumlapas
-    res = requests.get(BASE_URL)
+    res = requests.get(BASE_URL) #Veic pieprasījumu uz sākumlapu
     if res.status_code != 200:
         return []
-    soup = BeautifulSoup(res.content, "html.parser")
-    tags = [tag.text.strip() for tag in soup.find_all("span", class_="tag-item")]
-    return sorted(tags)
+    soup = BeautifulSoup(res.content, "html.parser") #Parsē HTML
+    tags = [tag.text.strip() for tag in soup.find_all("span", class_="tag-item")] #Iegūst visus tagus
+    return sorted(tags) #Atgriež sakārtotu sarakstu
 
-def get_author_quotes(author_name):
+def get_author_quotes(author_name): #Iegūst konkrētā autora visus citātus
     quotes = []
     page = 1
     while True:
@@ -37,13 +37,13 @@ def get_author_quotes(author_name):
         soup = BeautifulSoup(res.content, "html.parser")
         for quote in soup.find_all("div", class_="quote"):
             author = quote.find("small", class_="author").text.strip()
-            if author.lower() == author_name.lower():
+            if author.lower() == author_name.lower(): #salīdzina autora vārdu, neatkarīgi no lielajiem burtiem
                 text = quote.find("span", class_="text").text
-                quotes.append(text)
-        if not soup.find("li", class_="next"):
+                quotes.append(text) #Pievieno citātu sarakstam
+        if not soup.find("li", class_="next"):  #Pārtrauc meklēšanas ciklu, ja vairs nav "Next" pogas
             break
         page += 1
-    return quotes
+    return quotes #Atgriež quotes sarakstu
 
 def get_quotes_by_tag(tag):
     quotes = []
