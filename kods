@@ -169,7 +169,7 @@ while True:
 
     elif choice == "5":
         quote = get_random_quote(data)
-        print("\n📝 Nejaušs citāts:")
+        print("\n Nejaušs citāts:")
         print(f'"{quote["text"]}" — {quote["author"]}')
 
     elif choice == "6":
