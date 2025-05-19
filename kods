@@ -163,23 +163,23 @@ while True:
         else:
             print("Autors nav atrasts.")
 
-    elif choice == "4":
-        sorted_authors = get_sorted_authors_by_birth(data)
+    elif choice == "4": # Ja lietotājs izvēlas opciju 4
+        sorted_authors = get_sorted_authors_by_birth(data) # Iegūst sarakstu ar autoriem sakārtotu pēc dzimšanas datuma
         print("\nAutori no vecākā uz jaunāko:")
-        for i, (name, info) in enumerate(sorted_authors, 1):
-            print(f"{i}. {name} (dzimis {info['birth_date'].strftime('%Y-%m-%d')})")
+        for i, (name, info) in enumerate(sorted_authors, 1): # Iziet cauri sarakstam ar numuriem
+            print(f"{i}. {name} (dzimis {info['birth_date'].strftime('%Y-%m-%d')})") # Izvada autora vārdu un dzimšanas datumu formātā GGGG-MM-DD
 
-    elif choice == "5":
-        quote = get_random_quote(data)
+    elif choice == "5": # Ja izvēlas opciju 5
+        quote = get_random_quote(data) # Iegūst nejaušu citātu no datiem
         print("\n Nejaušs citāts:")
-        print(f'"{quote["text"]}" — {quote["author"]}')
+        print(f'"{quote["text"]}" — {quote["author"]}') # Izvada citātu un autora vārdu
 
-    elif choice == "6":
+    elif choice == "6": # Ja izvēlas opciju 6
         keyword = input("Ievadi atslēgvārdu/frāzi: ").strip()
-        results = search_quotes_by_keyword(data, keyword)
-        if results:
+        results = search_quotes_by_keyword(data, keyword) # Meklē citātus, kuros ir šis atslēgvārds/frāze
+        if results: # Ja atrasti kādi citāti
             print(f"\nCitāti, kuros parādās '{keyword}':")
-            for q in results:
-                print(f'- "{q["text"]}" — {q["author"]}')
-        else:
+            for q in results: # Iziet cauri visiem atrastajiem citātiem
+                print(f'- "{q["text"]}" — {q["author"]}') # Izvada katru citātu un tā autoru
+        else: 
             print("Netika atrasti citāti ar šo atslēgvārdu.")
