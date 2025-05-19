@@ -1,7 +1,7 @@
 import requests 
-from bs4 import BeautifulSoup # Bibliotēka, kas palīdz saprast un nolasīt HTML saturu 
-from datetime import datetime # Importē datuma un laika rīkus
-import random # Bibliotēka, kas ļauj izdarīt nejaušas darbības – piem., izvēlēties nejaušu citātu
+from bs4 import BeautifulSoup  
+from datetime import datetime 
+import random 
 
 BASE_URL = "https://quotes.toscrape.com" # Galvenā vietne, no kuras tiks iegūti citāti, autori un tagi
 
