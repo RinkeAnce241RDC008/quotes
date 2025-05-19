@@ -63,30 +63,30 @@ def preload_all_data(): # Funkcija, kas ielādē un saglabā visus datus no viet
 # ==== Funkcijas, kas izmanto ielādētos datus ====
 
 def get_all_authors(data):
-    return sorted(data["authors"].keys())
+    return sorted(data["authors"].keys())  # Atgriež visu autoru vārdus alfabētiskā secībā
 
 def get_author_quotes(data, author_name):
-    return [q["text"] for q in data["quotes"] if q["author"].lower() == author_name.lower()]
+    return [q["text"] for q in data["quotes"] if q["author"].lower() == author_name.lower()] # Atgriež visus konkrētā autora citātus, teksta veidā
 
 def get_quotes_by_tag(data, tag):
-    return [q["text"] for q in data["quotes"] if tag in q["tags"]]
+    return [q["text"] for q in data["quotes"] if tag in q["tags"]] # Atgriež visus citātus, kuriem ir norādītais tags
 
 def get_author_info(data, author_name):
-    return data["authors"].get(author_name)
+    return data["authors"].get(author_name) # Atgriež informāciju par autoru
 
 def get_sorted_authors_by_birth(data):
-    return sorted(data["authors"].items(), key=lambda x: x[1]["birth_date"])
+    return sorted(data["authors"].items(), key=lambda x: x[1]["birth_date"]) # Atgriež visus autorus sakārtotus pēc dzimšanas datuma (no vecākā uz jaunāko)
 
 def get_random_quote(data):
-    return random.choice(data["quotes"])
+    return random.choice(data["quotes"]) # Atgriež nejauši izvēlētu citātu no visiem pieejamajiem
 
 def search_quotes_by_keyword(data, keyword):
-    return [q for q in data["quotes"] if keyword.lower() in q["text"].lower()]
+    return [q for q in data["quotes"] if keyword.lower() in q["text"].lower()] # Atgriež visus citātus, kuros tekstā ir meklētais vārds
 
 # ==== CLI ====
 
-print("Datu ielāde...")
-data = preload_all_data()
+print("Datu ielāde...") 
+data = preload_all_data() # Izsauc funkciju, kas ielādē visus datus
 
 while True:
     print("1. Citāts pēc autora")
@@ -99,65 +99,65 @@ while True:
 
     choice = input("Izvēlies opciju (1-6): ").strip().lower()
 
-    if choice == "stop":
+    if choice == "stop": # Ja lietotājs ieraksta "stop", paziņo, ka programma beidz darbu
         print("Programma pārtraukta.")
         break
 
-    elif choice == "1":
-        authors = get_all_authors(data)
-        for i, a in enumerate(authors, 1):
-            print(f"{i}. {a}")
+    elif choice == "1": # Ja lietotājs izvēlas opciju 1 
+        authors = get_all_authors(data) # Iegūst sarakstu ar visiem autoriem no datiem
+        for i, a in enumerate(authors, 1): # Iziet cauri autoriem, piešķirot katram numuru no 1
+            print(f"{i}. {a}") # Izvada autoru sarakstu ar numuriem
         author_input = input("Ievadi autora vārdu vai numuru: ").strip()
-        if author_input.isdigit():
-            idx = int(author_input) - 1
-            if 0 <= idx < len(authors):
-                author_input = authors[idx]
+        if author_input.isdigit(): # Ja lietotājs ievadījis skaitli
+            idx = int(author_input) - 1 # Pārvērš to par indeksu (jo sarakstā sākas no 0)
+            if 0 <= idx < len(authors): # Pārbauda, vai numurs ir derīgs autoru sarakstā
+                author_input = authors[idx] # Ja jā, nomaina ievadi uz konkrēto autora vārdu
             else:
                 print("Nepareizs numurs.")
-                continue
-        quotes = get_author_quotes(data, author_input)
-        if quotes:
-            print(f"\nCitāti no {author_input}:")
-            for q in quotes:
-                print(" -", q)
+                continue # Atgriežas pie sākuma, ļauj izvēlēties vēlreiz
+        quotes = get_author_quotes(data, author_input # Iegūst visus citātus pēc autora vārda
+        if quotes: # Ja atrasti kādi citāti
+            print(f"\nCitāti no {author_input}:") # Izvada paziņojumu par autoru
+            for q in quotes: # Iet cauri visiem citātiem
+                print(" -", q) # Izvada katru citātu 
         else:
             print("Nav atrasti citāti.")
 
-    elif choice == "2":
-        tags = data["tags"]
-        for i, tag in enumerate(tags, 1):
-            print(f"{i}. {tag}")
-        tag_input = input("Ievadi tagu vai numuru: ").strip()
-        if tag_input.isdigit():
-            idx = int(tag_input) - 1
-            if 0 <= idx < len(tags):
-                tag_input = tags[idx]
+    elif choice == "2": # Ja lietotājs izvēlas opciju 2
+        tags = data["tags"] # Iegūst visus pieejamos tagus no datiem
+        for i, tag in enumerate(tags, 1): # Iziet cauri visiem tagiem ar numuriem, sākot no 1
+            print(f"{i}. {tag}") # Izvada katru tagu ar numuru priekšā
+        tag_input = input("Ievadi tagu vai numuru: ").strip() 
+        if tag_input.isdigit(): # Ja ievadīts skaitlis
+            idx = int(tag_input) - 1 # Pārvērš to par indeksu (jo sarakstā indeksi sākas no 0)
+            if 0 <= idx < len(tags): # Pārbauda, vai šis numurs ir derīgs tagu sarakstā
+                tag_input = tags[idx] # Ja jā, aizvieto ievadi ar konkrēto tagu
             else:
                 print("Nepareizs numurs.")
-                continue
-        quotes = get_quotes_by_tag(data, tag_input)
-        if quotes:
-            print(f"\nCitāti kategorijā '{tag_input}':")
-            for q in quotes:
-                print(" -", q)
+                continue # Atgriežas pie cikla sākuma, lai ļautu ievadīt vēlreiz
+        quotes = get_quotes_by_tag(data, tag_input) # Iegūst citātus, kas atbilst norādītajam tagam
+        if quotes: # Ja atrasti citāti
+            print(f"\nCitāti kategorijā '{tag_input}':") # Izvada paziņojumu ar kategorijas nosaukumu
+            for q in quotes: # Iet cauri visiem atrastajiem citātiem
+                print(" -", q # Izvada katru citātu
         else:
             print("Nav atrasti citāti.")
 
-    elif choice == "3":
-        authors = get_all_authors(data)
-        for i, a in enumerate(authors, 1):
-            print(f"{i}. {a}")
+    elif choice == "3": # Ja lietotājs izvēlas opciju 3
+        authors = get_all_authors(data) # Iegūst sarakstu ar visiem autoriem, sakārtotu alfabētiski
+        for i, a in enumerate(authors, 1): # Iziet cauri autoru sarakstam ar numuriem, sākot no 1
+            print(f"{i}. {a}") # Izvada katra autora vārdu ar numuru priekšā
         author_input = input("Ievadi autora vārdu vai numuru: ").strip()
-        if author_input.isdigit():
-            idx = int(author_input) - 1
-            if 0 <= idx < len(authors):
-                author_input = authors[idx]
+        if author_input.isdigit(): # Ja ievade ir skaitlis
+            idx = int(author_input) - 1 # Pārvērš to par indeksu sarakstā (sākas no 0)
+            if 0 <= idx < len(authors): # Pārbauda, vai numurs ir derīgs
+                author_input = authors[idx] # Ja derīgs, aizvieto ievadi ar autora vārdu no saraksta
             else:
                 print("Nepareizs numurs.")
-                continue
-        info = get_author_info(data, author_input)
-        if info:
-            print(f"\nInformācija par {author_input}:")
+                continue # Atgriežas pie cikla sākuma, ļauj lietotājam mēģināt vēlreiz
+        info = get_author_info(data, author_input) # Iegūst informāciju par autoru pēc viņa vārda
+        if info: # Ja informācija ir pieejama
+            print(f"\nInformācija par {author_input}:") # Izvada ziņu, par ko būs informācija
             print("Dzimis:", info["birth_str"], info["birth_place"])
             print("Apraksts:", info["description"])
         else:
