@@ -43,25 +43,25 @@ def get_author_quotes(author_name): #Iegūst konkrētā autora visus citātus
         if not soup.find("li", class_="next"):  #Pārtrauc meklēšanas ciklu, ja vairs nav "Next" pogas
             break
         page += 1
-    return quotes #Atgriež quotes sarakstu
+    return quotes #Atgriež citātu sarakstu
 
-def get_quotes_by_tag(tag):
-    quotes = []
-    page = 1
+def get_quotes_by_tag(tag): #Iegūst visus citātus no lapas pēc konkrēta taga
+    quotes = [] #Sagatavo tukšu sarakstu, kurā glabāsies atrastie citāti
+    page = 1 #Sāk ar pirmo lapu
     while True:
-        res = requests.get(f"{BASE_URL}/tag/{tag}/page/{page}/")
-        if res.status_code != 200:
+        res = requests.get(f"{BASE_URL}/tag/{tag}/page/{page}/") #Sūta pieprasījumu uz konkrēto taagu un lapu 
+        if res.status_code != 200: #Pārtrauc ciklu, ja lapa nav pieejama
             break
-        soup = BeautifulSoup(res.content, "html.parser")
-        quote_divs = soup.find_all("div", class_="quote")
-        if not quote_divs:
+        soup = BeautifulSoup(res.content, "html.parser") #Nolasīto HTML saturu padara Python saprotamu
+        quote_divs = soup.find_all("div", class_="quote") #Atrod visus HTML blokus ar klasi "quote"
+        if not quote_divs: #Pārtrauc ciklu, ja lapā nav neviena citāta
             break
-        for quote in quote_divs:
-            quotes.append(quote.find("span", class_="text").text)
-        if not soup.find("li", class_="next"):
+        for quote in quote_divs: #Pāriet cauri katram citāta blokam lapā
+            quotes.append(quote.find("span", class_="text").text) #Atrod citāta tekstu un pievieno to sarakstam
+        if not soup.find("li", class_="next"): #Pārtrauc ciklu, ja nav "next" lapas poga
             break
-        page += 1
-    return quotes
+        page += 1 #Ja ir nākamā lapa, palielina lapas numuru par 1 un turpina
+    return quotes #Atgriež visus savāktos citātus, kā sarakstu
 
 def get_author_info(author_name):
     page = 1
