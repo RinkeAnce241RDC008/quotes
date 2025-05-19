@@ -1,1 +1,27 @@
-	Šis projekts ir Python valodā izstrādāts tīmekļa skrāperis no vietnes https://quotes.toscrape.com. Programma ļauj lietotājam interaktīvi meklēt dažādus citātus pēc autora vai kategorijas, kā arī iegūt detalizētu informāciju par autoriem.
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime
+import concurrent.futures
+
+BASE_URL = "https://quotes.toscrape.com"
+
+def get_all_authors():
+    """Savelk visus autorus un to saites ar paralēliem pieprasījumiem."""
+    authors = set()
+    page = 1
+    while True:
+        try:
+            res = requests.get(f"{BASE_URL}/page/{page}/", timeout=10)
+            if res.status_code != 200:
+                break
+            soup = BeautifulSoup(res.content, "html.parser")
+            for author in soup.find_all("small", class_="author"):
+                authors.add(author.text.strip())
+            if not soup.find("li", class_="next"):
+                break
+            page += 1
+        except Exception as e:
+            print(f"Kļūda lapā {page}: {e}")
+            break
+    return sorted(authors)
+
