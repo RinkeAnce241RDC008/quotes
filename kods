@@ -4,22 +4,22 @@ from datetime import datetime #Ielādē datetime datumu formatēšanai un salīd
 
 BASE_URL = "https://quotes.toscrape.com"
 
-def get_all_authors():
-    authors = set()
-    page = 1
+def get_all_authors(): #Iegūst autorus no visām lapām
+    authors = set() #Izveido tukšu kopu, lai glabātu unikālus autoru vārdus
+    page = 1 #Sāk ar 1.lapu
     while True:
-        res = requests.get(f"{BASE_URL}/page/{page}/")
-        if res.status_code != 200:
+        res = requests.get(f"{BASE_URL}/page/{page}/") #Veic pieprasījumu uz konkrēto lapu
+        if res.status_code != 200: #Pārtrauc ciklu, ja lapa nav atrasta
             break
-        soup = BeautifulSoup(res.content, "html.parser")
-        for author in soup.find_all("small", class_="author"):
-            authors.add(author.text.strip())
-        if not soup.find("li", class_="next"):
+        soup = BeautifulSoup(res.content, "html.parser")   #Parsē HTML saturu
+        for author in soup.find_all("small", class_="author"): #Atrod visus autora elementus
+            authors.add(author.text.strip()) #Pievieno autoru vārdus kopai
+        if not soup.find("li", class_="next"): #Pārtrauc ciklu, ja nav nākamās lapas
             break
-        page += 1
-    return sorted(authors)
+        page += 1 #pāriet uz nākamo lapu
+    return sorted(authors) #Atgriež sakārtotu autoru sarakstu
 
-def get_all_tags():
+def get_all_tags(): #Iegūst visus tagus no sākumlapas
     res = requests.get(BASE_URL)
     if res.status_code != 200:
         return []
