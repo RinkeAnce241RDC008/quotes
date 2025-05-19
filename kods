@@ -1,4 +1,4 @@
-import requests # Bibliotēka, kas ļauj sūtīt HTTP pieprasījumus uz interneta lapām
+import requests 
 from bs4 import BeautifulSoup # Bibliotēka, kas palīdz saprast un nolasīt HTML saturu 
 from datetime import datetime # Importē datuma un laika rīkus
 import random # Bibliotēka, kas ļauj izdarīt nejaušas darbības – piem., izvēlēties nejaušu citātu
