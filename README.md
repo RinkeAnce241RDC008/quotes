@@ -1,6 +1,6 @@
 # Projekta darbs "Citātu izgūšanas un analīzes programma"
-**Veidoja: Ance Riņķe; Paula Ekerte; Dāvis Kononovs**
-
+**Izstrādāja: Ance Riņķe; Paula Ekerte; Dāvis Kononovs**
+---
 ## Projekta uzdevums
 
 Šī projekta, kas veikts Python galvenais uzdevums ir izmantojot tīmekļa skrāpēšanas (webscraping) principu, iegūtu datus no vietnes [quotes.toscrape.com](https://quotes.toscrape.com). Programmas mērķis ir:
