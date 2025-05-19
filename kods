@@ -1,18 +1,19 @@
-import requests
-from bs4 import BeautifulSoup
-from datetime import datetime
-import random
+import requests #Bibliotēka, kas ļauj sūtīt HTTP pieprasījumus uz interneta lapām
+from bs4 import BeautifulSoup #Bibliotēka, kas palīdz saprast un nolasīt HTML saturu 
+from datetime import datetime #Importē datuma un laika rīkus
+import random #Bibliotēka, kas ļauj izdarīt nejaušas darbības – piem., izvēlēties nejaušu citātu
 
-BASE_URL = "https://quotes.toscrape.com"
+BASE_URL = "https://quotes.toscrape.com" #Galvenā vietne, no kuras tiks iegūti citāti, autori un tagi
 
-def preload_all_data():
+def preload_all_data(): #Funkcija, kas ielādē un saglabā visus datus no vietnes-citātus, autorus, tagus)
     all_data = {
-        "authors": {},
-        "quotes": [],
-        "tags": set()
+        "authors": {}, #Saglabās autoru vārdus un viņu informāciju
+        "quotes": [], #Saglabās visus atrastos citātus
+        "tags": set() #Saglabās visus tagus, bez atkārtojumiem
     }
-    page = 1
-    seen_authors = set()
+    }
+    page = 1 #Sāk ar pirmo lapu
+    seen_authors = set() #Saglabās autorus, kurus jau esam apstrādājuši, lai tie nedublētos
 
     while True:
         res = requests.get(f"{BASE_URL}/page/{page}/")
