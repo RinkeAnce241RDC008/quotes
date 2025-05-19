@@ -16,21 +16,21 @@ def preload_all_data(): #Funkcija, kas ielādē un saglabā visus datus no vietn
     seen_authors = set() #Saglabās autorus, kurus jau esam apstrādājuši, lai tie nedublētos
 
     while True:
-        res = requests.get(f"{BASE_URL}/page/{page}/")
-        if res.status_code != 200:
+        res = requests.get(f"{BASE_URL}/page/{page}/") #Nosūta pieprasījumu uz konkrēto lapu ar citātiem 
+        if res.status_code != 200: #Pārtrauc ciklu, ja atbildes kods nav 200
             break
-        soup = BeautifulSoup(res.content, "html.parser")
-
-        for quote_div in soup.find_all("div", class_="quote"):
-            text = quote_div.find("span", class_="text").text
-            author = quote_div.find("small", class_="author").text.strip()
-            tags = [tag.text.strip() for tag in quote_div.find_all("a", class_="tag")]
+        soup = BeautifulSoup(res.content, "html.parser") #Izveido HTML dokumenta "lasāmu" versiju, ko Python var saprast un pārmeklēt
+        
+        for quote_div in soup.find_all("div", class_="quote"): #Atrod visus citātu blokus lapā – katrs citāts ir ievietots <div> ar klasi "quote"
+            text = quote_div.find("span", class_="text").text  #Iegūst citāta tekstu no <span> ar klasi "text"
+            author = quote_div.find("small", class_="author").text.strip() #Iegūst autora vārdu no <small> ar klasi "author" un noņem liekās atstarpes
+            tags = [tag.text.strip() for tag in quote_div.find_all("a", class_="tag")] #Atrod visus tagus šim citātam un saglabā tos kā sarakstu,noņem liekās atstarpes
             all_data["quotes"].append({
                 "text": text,
                 "author": author,
                 "tags": tags
-            })
-            all_data["tags"].update(tags)
+            }) #Saglabā šo citātu, autoru un tagus kopējā sarakstā "quotes"
+            all_data["tags"].update(tags) #Pievieno visus tagus kopējam tagu sarakstam, lai nav dublikātu
 
             if author not in seen_authors:
                 seen_authors.add(author)
