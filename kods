@@ -1,144 +1,108 @@
-import requests #Ielādē requests bibliotēku, lai veiktu HTTP pieprasījumus
-from bs4 import BeautifulSoup #Ielādē BeautifulSoup HTML datu parsēšanai
-from datetime import datetime #Ielādē datetime datumu formatēšanai un salīdzināšanai
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime
+import random
 
 BASE_URL = "https://quotes.toscrape.com"
 
-def get_all_authors(): #Iegūst autorus no visām lapām
-    authors = set() #Izveido tukšu kopu, lai glabātu unikālus autoru vārdus
-    page = 1 #Sāk ar 1.lapu
-    while True:
-        res = requests.get(f"{BASE_URL}/page/{page}/") #Veic pieprasījumu uz konkrēto lapu
-        if res.status_code != 200: #Pārtrauc ciklu, ja lapa nav atrasta
-            break
-        soup = BeautifulSoup(res.content, "html.parser")   #Parsē HTML saturu
-        for author in soup.find_all("small", class_="author"): #Atrod visus autora elementus
-            authors.add(author.text.strip()) #Pievieno autoru vārdus kopai
-        if not soup.find("li", class_="next"): #Pārtrauc ciklu, ja nav nākamās lapas
-            break
-        page += 1 #pāriet uz nākamo lapu
-    return sorted(authors) #Atgriež sakārtotu autoru sarakstu
-
-def get_all_tags(): #Iegūst visus tagus no sākumlapas
-    res = requests.get(BASE_URL) #Veic pieprasījumu uz sākumlapu
-    if res.status_code != 200:
-        return []
-    soup = BeautifulSoup(res.content, "html.parser") #Parsē HTML
-    tags = [tag.text.strip() for tag in soup.find_all("span", class_="tag-item")] #Iegūst visus tagus
-    return sorted(tags) #Atgriež sakārtotu sarakstu
-
-def get_author_quotes(author_name): #Iegūst konkrētā autora visus citātus
-    quotes = []
+def preload_all_data():
+    all_data = {
+        "authors": {},
+        "quotes": [],
+        "tags": set()
+    }
     page = 1
+    seen_authors = set()
+
     while True:
         res = requests.get(f"{BASE_URL}/page/{page}/")
         if res.status_code != 200:
             break
         soup = BeautifulSoup(res.content, "html.parser")
-        for quote in soup.find_all("div", class_="quote"):
-            author = quote.find("small", class_="author").text.strip()
-            if author.lower() == author_name.lower(): #salīdzina autora vārdu, neatkarīgi no lielajiem burtiem
-                text = quote.find("span", class_="text").text
-                quotes.append(text) #Pievieno citātu sarakstam
-        if not soup.find("li", class_="next"):  #Pārtrauc meklēšanas ciklu, ja vairs nav "Next" pogas
-            break
-        page += 1
-    return quotes #Atgriež citātu sarakstu
 
-def get_quotes_by_tag(tag): #Iegūst visus citātus no lapas pēc konkrēta taga
-    quotes = [] #Sagatavo tukšu sarakstu, kurā glabāsies atrastie citāti
-    page = 1 #Sāk ar pirmo lapu
-    while True:
-        res = requests.get(f"{BASE_URL}/tag/{tag}/page/{page}/") #Sūta pieprasījumu uz konkrēto taagu un lapu 
-        if res.status_code != 200: #Pārtrauc ciklu, ja lapa nav pieejama
-            break
-        soup = BeautifulSoup(res.content, "html.parser") #Nolasīto HTML saturu padara Python saprotamu
-        quote_divs = soup.find_all("div", class_="quote") #Atrod visus HTML blokus ar klasi "quote"
-        if not quote_divs: #Pārtrauc ciklu, ja lapā nav neviena citāta
-            break
-        for quote in quote_divs: #Pāriet cauri katram citāta blokam lapā
-            quotes.append(quote.find("span", class_="text").text) #Atrod citāta tekstu un pievieno to sarakstam
-        if not soup.find("li", class_="next"): #Pārtrauc ciklu, ja nav "next" lapas poga
-            break
-        page += 1 #Ja ir nākamā lapa, palielina lapas numuru par 1 un turpina
-    return quotes #Atgriež visus savāktos citātus, kā sarakstu
+        for quote_div in soup.find_all("div", class_="quote"):
+            text = quote_div.find("span", class_="text").text
+            author = quote_div.find("small", class_="author").text.strip()
+            tags = [tag.text.strip() for tag in quote_div.find_all("a", class_="tag")]
+            all_data["quotes"].append({
+                "text": text,
+                "author": author,
+                "tags": tags
+            })
+            all_data["tags"].update(tags)
 
-def get_author_info(author_name):
-    page = 1
-    while True:
-        res = requests.get(f"{BASE_URL}/page/{page}/")
-        if res.status_code != 200:
-            break
-        soup = BeautifulSoup(res.content, "html.parser")
-        for quote in soup.find_all("div", class_="quote"):
-            author = quote.find("small", class_="author").text.strip()
-            if author.lower() == author_name.lower():
-                link_tag = quote.find("a", href=lambda href: href and href.startswith("/author/"))
-                if link_tag:
-                    author_page = requests.get(BASE_URL + link_tag["href"])
+            if author not in seen_authors:
+                seen_authors.add(author)
+                link = quote_div.find("a", href=lambda href: href and href.startswith("/author/"))
+                if link:
+                    author_page = requests.get(BASE_URL + link["href"])
                     if author_page.status_code == 200:
-                        soup = BeautifulSoup(author_page.content, "html.parser")
-                        birth_date = soup.find(class_="author-born-date").text
-                        birth_place = soup.find(class_="author-born-location").text
-                        desc = soup.find("div", class_="author-description").text.strip()
-                        return {
-                            "name": author,
-                            "born": birth_date,
-                            "place": birth_place,
-                            "description": desc
-                        }
+                        author_soup = BeautifulSoup(author_page.content, "html.parser")
+                        try:
+                            birth_date = author_soup.find(class_="author-born-date").text
+                            birth_place = author_soup.find(class_="author-born-location").text
+                            description = author_soup.find("div", class_="author-description").text.strip()
+                            birth_date_obj = datetime.strptime(birth_date, "%B %d, %Y")
+                            all_data["authors"][author] = {
+                                "birth_date": birth_date_obj,
+                                "birth_str": birth_date,
+                                "birth_place": birth_place,
+                                "description": description
+                            }
+                        except Exception:
+                            continue
         if not soup.find("li", class_="next"):
             break
         page += 1
-    return None
 
-def get_all_authors_with_birthdates():
-    authors = {}
-    page = 1
-    seen = set()
-    while True:
-        res = requests.get(f"{BASE_URL}/page/{page}/")
-        if res.status_code != 200:
-            break
-        soup = BeautifulSoup(res.content, "html.parser")
-        for quote in soup.find_all("div", class_="quote"):
-            name = quote.find("small", class_="author").text.strip()
-            if name in seen:
-                continue
-            seen.add(name)
-            link_tag = quote.find("a", href=lambda href: href and href.startswith("/author/"))
-            if link_tag:
-                author_page = requests.get(BASE_URL + link_tag["href"])
-                if author_page.status_code == 200:
-                    author_soup = BeautifulSoup(author_page.content, "html.parser")
-                    try:
-                        birth_date = author_soup.find(class_="author-born-date").text
-                        birth_date_obj = datetime.strptime(birth_date, "%B %d, %Y")
-                        authors[name] = birth_date_obj
-                    except Exception:
-                        continue
-        if not soup.find("li", class_="next"):
-            break
-        page += 1
-    return authors
+    all_data["tags"] = sorted(all_data["tags"])
+    return all_data
+
+# ==== Funkcijas, kas izmanto ielādētos datus ====
+
+def get_all_authors(data):
+    return sorted(data["authors"].keys())
+
+def get_author_quotes(data, author_name):
+    return [q["text"] for q in data["quotes"] if q["author"].lower() == author_name.lower()]
+
+def get_quotes_by_tag(data, tag):
+    return [q["text"] for q in data["quotes"] if tag in q["tags"]]
+
+def get_author_info(data, author_name):
+    return data["authors"].get(author_name)
+
+def get_sorted_authors_by_birth(data):
+    return sorted(data["authors"].items(), key=lambda x: x[1]["birth_date"])
+
+def get_random_quote(data):
+    return random.choice(data["quotes"])
+
+def search_quotes_by_keyword(data, keyword):
+    return [q for q in data["quotes"] if keyword.lower() in q["text"].lower()]
 
 # ==== CLI ====
-while True:
-    print("\n== Iespējas ==")
-    print("1. Meklēt citātus pēc autora")
-    print("2. Meklēt citātus pēc kategorijas")
-    print("3. Parādīt informāciju par autoru")
-    print("4. Sakārtot autorus no vecākā uz jaunāko")
-    print("Ievadi 'stop' lai pārtrauktu\n")
 
-    choice = input("Izvēlies opciju (1-4): ").strip().lower()
+print("Datu ielāde...")
+data = preload_all_data()
+
+while True:
+    print("1. Citāts pēc autora")
+    print("2. Citāts pēc kategorijas")
+    print("3. informācija par autoru")
+    print("4. Autori no vecākā uz jaunāko")
+    print("5. Nejaušs citāts")
+    print("6. Citāts pēc atslēgas vārda")
+    print("'stop' lai pārtrauktu\n")
+
+    choice = input("Izvēlies opciju (1-6): ").strip().lower()
 
     if choice == "stop":
         print("Programma pārtraukta.")
         break
 
     elif choice == "1":
-        authors = get_all_authors()
+        authors = get_all_authors(data)
         for i, a in enumerate(authors, 1):
             print(f"{i}. {a}")
         author_input = input("Ievadi autora vārdu vai numuru: ").strip()
@@ -149,7 +113,7 @@ while True:
             else:
                 print("Nepareizs numurs.")
                 continue
-        quotes = get_author_quotes(author_input)
+        quotes = get_author_quotes(data, author_input)
         if quotes:
             print(f"\nCitāti no {author_input}:")
             for q in quotes:
@@ -158,7 +122,7 @@ while True:
             print("Nav atrasti citāti.")
 
     elif choice == "2":
-        tags = get_all_tags()
+        tags = data["tags"]
         for i, tag in enumerate(tags, 1):
             print(f"{i}. {tag}")
         tag_input = input("Ievadi tagu vai numuru: ").strip()
@@ -169,7 +133,7 @@ while True:
             else:
                 print("Nepareizs numurs.")
                 continue
-        quotes = get_quotes_by_tag(tag_input)
+        quotes = get_quotes_by_tag(data, tag_input)
         if quotes:
             print(f"\nCitāti kategorijā '{tag_input}':")
             for q in quotes:
@@ -178,7 +142,7 @@ while True:
             print("Nav atrasti citāti.")
 
     elif choice == "3":
-        authors = get_all_authors()
+        authors = get_all_authors(data)
         for i, a in enumerate(authors, 1):
             print(f"{i}. {a}")
         author_input = input("Ievadi autora vārdu vai numuru: ").strip()
@@ -189,23 +153,31 @@ while True:
             else:
                 print("Nepareizs numurs.")
                 continue
-        info = get_author_info(author_input)
+        info = get_author_info(data, author_input)
         if info:
-            print(f"\nInformācija par {info['name']}:")
-            print("Dzimis:", info["born"], info["place"])
+            print(f"\nInformācija par {author_input}:")
+            print("Dzimis:", info["birth_str"], info["birth_place"])
             print("Apraksts:", info["description"])
         else:
             print("Autors nav atrasts.")
 
     elif choice == "4":
-        authors = get_all_authors_with_birthdates()
-        sorted_list = sorted(authors.items(), key=lambda x: x[1])
+        sorted_authors = get_sorted_authors_by_birth(data)
         print("\nAutori no vecākā uz jaunāko:")
-        for i, (name, date) in enumerate(sorted_list, 1):
-            print(f"{i}. {name} (dzimis {date.strftime('%Y-%m-%d')})")
+        for i, (name, info) in enumerate(sorted_authors, 1):
+            print(f"{i}. {name} (dzimis {info['birth_date'].strftime('%Y-%m-%d')})")
 
-    else:
-        print("Nepareiza izvēle.")
+    elif choice == "5":
+        quote = get_random_quote(data)
+        print("\n📝 Nejaušs citāts:")
+        print(f'"{quote["text"]}" — {quote["author"]}')
 
-
-
+    elif choice == "6":
+        keyword = input("Ievadi atslēgvārdu/frāzi: ").strip()
+        results = search_quotes_by_keyword(data, keyword)
+        if results:
+            print(f"\nCitāti, kuros parādās '{keyword}':")
+            for q in results:
+                print(f'- "{q["text"]}" — {q["author"]}')
+        else:
+            print("Netika atrasti citāti ar šo atslēgvārdu.")
