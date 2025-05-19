@@ -1,10 +1,11 @@
-# Citātu izgūšanas un analīzes programma
+# Projekta darbs "Citātu izgūšanas un analīzes programma"
+**Veidoja: Ance Riņķe; Paula Ekerte; Dāvis Kononovs**
 
 ## Projekta uzdevums
 
-Šī Python programmā tiek izmantots tīmekļa skrāpēšanas (web scraping) princips, lai iegūtu datus no vietnes [quotes.toscrape.com](https://quotes.toscrape.com). Programmas mērķis ir:
+Šī projekta, kas veikts Python galvenais uzdevums ir izmantojot tīmekļa skrāpēšanas (webscraping) principu, iegūtu datus no vietnes [quotes.toscrape.com](https://quotes.toscrape.com). Programmas mērķis ir:
 
-	- Automātiski ielādēt visus citātus no vietnes, to autorus un saistītās kategorijas (tagus).
+	- Automātiski ielādēt visus citātus no vietnes, to autorus un saistītās kategorijas.
 	- Piedāvāt lietotājam iespēju izmantot dažādas funkcijas komandrindas saskarnē:
  	- Skatīt citātus pēc autora vārda.
 	- Skatīt citātus pēc tēmas jeb taga.
@@ -22,24 +23,22 @@
 Programmas izstrādes laikā tika izmantotas šādas Python bibliotēkas:
 
 - **requests**  
-  Nodrošina HTTP pieprasījumu veikšanu, lai ielādētu tīmekļa lapas saturu.
+	Šī bibliotēka ir viena no visbiežāk izmantotajām HTTP pieprasījumu veikšanai Python valodā. Projektā tā tiek izmantota, lai lejupielādētu HTML saturu no ārējās vietnes quotes.toscrape.com. Katras lapas saturs tiek iegūts ar requests.get() funkciju, kas ļauj piekļūt citātiem, autoru lapām un pārvietoties pa vairākiem lapošanas līmeņiem. Šīs bibliotēkas vienkāršā sintakse un uzticamība padara to ļoti piemērotu webscraping uzdevumiem.
 
 - **BeautifulSoup (no bs4)**  
-  Lietota HTML dokumenta parsēšanai, lai izgūtu konkrētus datus (citātus, autorus, tagus) no lapas struktūras.
+	Bibliotēka, kas ļauj analizēt un strukturēt HTML dokumentus. Projektā BeautifulSoup tiek izmantota, lai no ielādētā HTML koda "izvilktu" konkrētus datus — piemēram, atrastu katru citātu, autora vārdu, tagus, kā arī atsevišķas autora biogrāfijas lapas datus, piemēram, dzimšanas datumu un vietu. Tā ļauj viegli navigēt HTML kokā un meklēt elementus pēc klasēm, tagiem vai atribūtiem, kas padara datu vākšanu efektīvu un saprotamu.
 
 - **datetime**  
-  Nodrošina datumu apstrādi, kas nepieciešama autoru dzimšanas datumu salīdzināšanai un kārtošanai.
+	Šī Python iebūvētā bibliotēka nodrošina darbu ar datumiem un laikiem. Programmā tā tiek izmantota, lai pārveidotu autoru dzimšanas datumus no teksta ("January 1, 1900") uz datetime objektu formātu. Tas ļauj sakārtot autorus pēc dzimšanas gadiem un pēc tam attēlot tos hronoloģiskā secībā. datetime.strptime() funkcija tiek izmantota datuma pārformatēšanai no teksta formāta uz Python objektu, kas vēlāk ļauj veikt datumu salīdzināšanu.
 
 - **random**  
-  Izmantota nejauša citāta izvēlei no ielādētā datu kopuma.
-
-Šīs bibliotēkas izvēlētas to vienkāršības, dokumentācijas un piemērotības dēļ šim uzdevumam. Tās ir bieži izmantotas datu apstrādes un tīmekļa skrāpēšanas projektos.
+	Šī bibliotēka tiek izmantota, lai nodrošinātu nejaušības funkcionalitāti. Projektā tā tiek lietota, lai izvadītu nejauši izvēlētu citātu no visiem savāktajiem. Funkcija random.choice() izvēlas vienu elementu no saraksta, un šajā gadījumā tā palīdz lietotājam ieraudzīt dažādus iedvesmojošus vai pārdomu pilnus citātus, nezinot iepriekš, kurš tiks parādīts.
 
 ---
 
 ## Lietotās datu struktūras
 
-Projekta ietvaros ir izmantotas vairākas lietotāja definētas un Python iebūvētas datu struktūras:
+Projekta ietvaros ir izmantotas vairākas Python iebūvētas datu struktūras:
 
 - **Vārdnīca (`dict`)**  
   Saglabā visu autoru informāciju (`data["authors"]`), kā arī visus citātus (`data["quotes"]`), kur katrs ieraksts satur tekstu, autoru un tagus.
@@ -57,25 +56,31 @@ Projekta ietvaros ir izmantotas vairākas lietotāja definētas un Python iebūv
 
 ## Programmatūras izmantošana
 
-Lietotājs palaizh programmu terminālī, kur viņam tiek piedāvātas sekojošas izvēles:
+Lietotājs palaižot programmu terminālī, saņem sarakstu ar sekojošām izvēlēm:
 
 1. **Citāts pēc autora**  
-   Lietotājs var izvēlēties autoru no saraksta vai ievadīt viņa vārdu, lai iegūtu visus autora citātus.
+	Šī funkcionalitāte ļauj lietotājam izvēlēties konkrētu autoru, lai apskatītu visus viņa citātus, kas atrodami vietnē quotes.toscrape.com. Programma piedāvā sarakstu ar visiem pieejamajiem autoriem, no kura lietotājs var izvēlēties konkrēto pēc tā nummerācijas vai arī manuāli ievadot autora vārdu. Ja autora vārds eksistē datu kopā, programma izvada visus šī autora citātus. 
 
 2. **Citāts pēc kategorijas (taga)**  
-   Lietotājs izvēlas vai ievada kādu no tagiem (piemēram, "life", "love", "inspirational"), lai redzētu ar šo tēmu saistītos citātus.
+	Lietotājam tiek piedāvāts saraksts ar visām tēmām (tagiem), kas atroda konkrētajā vietnē, piemēram: life, love, truth, inspirational, utt. Lietotājs var izvēlēties tēmu no saraksta vai arī to ievadīt manuāli. Pēc tam programma izvada visus citātus, kuri saistīti ar izvēlēto kategoriju.
 
-3. **Informācija par autoru**  
-   Lietotājs var pieprasīt detalizētu informāciju par autoru, piemēram, dzimšanas datumu, vietu un īsu biogrāfiju.
+4. **Informācija par autoru**  
+	Lietotājam ir iespēja iegūt papildus informāciju par konkrētu autoru. Ievadot autora vārdu vai izvēloties to no saraksta, programma parāda šādu informāciju:
 
-4. **Autoru kārtošana pēc dzimšanas gada**  
-   Parāda visus autorus sarindotus no vecākā uz jaunāko.
+dzimšanas datumu,
 
-5. **Nejaušs citāts**  
-   Parāda vienu nejauši izvēlētu citātu.
+dzimšanas vietu,
 
-6. **Citātu meklēšana pēc atslēgvārda**  
-   Meklē visus citātus, kuros parādās lietotāja ievadītais vārds vai frāze.
+īsu biogrāfisku aprakstu.
+
+5. **Autoru kārtošana pēc dzimšanas gada**  
+	Programma ļauj lietotājam apskatīt visu autoru sarakstu, sakārtotu hronoloģiskā secībā — sākot no vecākā autora līdz jaunākajam. Dzimšanas datumi tiek apstrādāti kā datetime objekti, kas nodrošina precīzu kārtošanu.
+
+6. **Nejaušs citāts**  
+	Lai padarītu programmu dinamiskāku un pārsteidzošāku, ir ieviesta funkcija, kas lietotājam parāda nejauši izvēlētu citātu no visa datu kopuma. Tas sniedz iespēju iepazīties ar dažādiem autoriem un tematiem bez iepriekšējas izvēles. 
+
+7. **Citātu meklēšana pēc atslēgvārda**  
+	Lietotājs var ievadīt jebkādu vārdu vai frāzi, un programma veic meklēšanu visos citātos, lai atrastu tos, kuros šis vārds/izteiciens parādās. Tas ļauj atrast konkrētiem vārdiem atbilstošus citātus — piemēram, ja ievada "happiness", tiks parādīti visi citāti, kuros šis vārds ir minēts.
 
 Programmas darbība turpinās līdz lietotājs ievada `'stop'`.
 
@@ -83,6 +88,7 @@ Programmas darbība turpinās līdz lietotājs ievada `'stop'`.
 
 ## Secinājumi
 
-Šis projekts ir labs piemērs, kā iegūt un izmantot strukturētus datus no tīmekļa, pielietot Python datu struktūras un veidot praktisku, interaktīvu programmatūru ar komandrindas saskarni. Tas uzlabo gan datu apstrādes, gan lietotāja pieredzes veidošanas prasmes.
+Šis projekts ir lielisks piemērs tam, kā ar Python palīdzību iegūt strukturētus datus no tīmekļa un pārveidot tos par interaktīvu rīku. Tas parāda, cik vienkārši var savienot webscraping ar praktisku pielietojumu — šajā gadījumā, iespēju ērti pārlūkot citātus pēc autora, tēmas vai atslēgvārda.
 
+Projekta gaitā nācās strādāt gan ar datu apstrādi, gan domāt par to, kā padarīt lietotāja pieredzi saprotamu un ērtu, izmantojot vienkāršu komandrindas izvēlni. Tika izmantotas dažādas Python iespējas un bibliotēkas, kas ne tikai automatizē darbu ar datiem.
 
