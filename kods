@@ -114,7 +114,7 @@ while True:
             else:
                 print("Nepareizs numurs.")
                 continue # Atgriežas pie sākuma, ļauj izvēlēties vēlreiz
-        quotes = get_author_quotes(data, author_input # Iegūst visus citātus pēc autora vārda
+        quotes = get_author_quotes(data, author_input) # Iegūst visus citātus pēc autora vārda
         if quotes: # Ja atrasti kādi citāti
             print(f"\nCitāti no {author_input}:") # Izvada paziņojumu par autoru
             for q in quotes: # Iet cauri visiem citātiem
