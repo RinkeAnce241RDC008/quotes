@@ -32,13 +32,13 @@ def preload_all_data(): #Funkcija, kas ielādē un saglabā visus datus no vietn
             }) #Saglabā šo citātu, autoru un tagus kopējā sarakstā "quotes"
             all_data["tags"].update(tags) #Pievieno visus tagus kopējam tagu sarakstam, lai nav dublikātu
 
-            if author not in seen_authors:
-                seen_authors.add(author)
-                link = quote_div.find("a", href=lambda href: href and href.startswith("/author/"))
-                if link:
-                    author_page = requests.get(BASE_URL + link["href"])
-                    if author_page.status_code == 200:
-                        author_soup = BeautifulSoup(author_page.content, "html.parser")
+            if author not in seen_authors: #Ja šis autors vēl nav apskatīts
+                seen_authors.add(author) #pievieno autoru sarakstam, kas jau ir apskatīti, lai neskatās atkārtoti
+                link = quote_div.find("a", href=lambda href: href and href.startswith("/author/")) #Atrod saiti uz autora profila lapu
+                if link: # Ja saite eksistē...
+                    author_page = requests.get(BASE_URL + link["href"]) # ...atver autora profila lapu
+                    if author_page.status_code == 200: #Ja lapa tika veiksmīgi ielādēta...
+                        author_soup = BeautifulSoup(author_page.content, "html.parser") # Izveido viegli pārskatāmu HTML struktūru no lapas satura
                         try:
                             birth_date = author_soup.find(class_="author-born-date").text
                             birth_place = author_soup.find(class_="author-born-location").text
