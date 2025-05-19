@@ -11,7 +11,6 @@ def preload_all_data(): # Funkcija, kas ielādē un saglabā visus datus no viet
         "quotes": [], # Saglabās visus atrastos citātus
         "tags": set() # Saglabās visus tagus, bez atkārtojumiem
     }
-    }
     page = 1 # Sāk ar pirmo lapu
     seen_authors = set() # Saglabās autorus, kurus jau esam apstrādājuši, lai tie nedublētos
 
