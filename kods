@@ -1,49 +1,49 @@
-import requests #Bibliotēka, kas ļauj sūtīt HTTP pieprasījumus uz interneta lapām
-from bs4 import BeautifulSoup #Bibliotēka, kas palīdz saprast un nolasīt HTML saturu 
-from datetime import datetime #Importē datuma un laika rīkus
-import random #Bibliotēka, kas ļauj izdarīt nejaušas darbības – piem., izvēlēties nejaušu citātu
+import requests # Bibliotēka, kas ļauj sūtīt HTTP pieprasījumus uz interneta lapām
+from bs4 import BeautifulSoup # Bibliotēka, kas palīdz saprast un nolasīt HTML saturu 
+from datetime import datetime # Importē datuma un laika rīkus
+import random # Bibliotēka, kas ļauj izdarīt nejaušas darbības – piem., izvēlēties nejaušu citātu
 
-BASE_URL = "https://quotes.toscrape.com" #Galvenā vietne, no kuras tiks iegūti citāti, autori un tagi
+BASE_URL = "https://quotes.toscrape.com" # Galvenā vietne, no kuras tiks iegūti citāti, autori un tagi
 
-def preload_all_data(): #Funkcija, kas ielādē un saglabā visus datus no vietnes-citātus, autorus, tagus)
+def preload_all_data(): # Funkcija, kas ielādē un saglabā visus datus no vietnes-citātus, autorus, tagus)
     all_data = {
-        "authors": {}, #Saglabās autoru vārdus un viņu informāciju
-        "quotes": [], #Saglabās visus atrastos citātus
-        "tags": set() #Saglabās visus tagus, bez atkārtojumiem
+        "authors": {}, # Saglabās autoru vārdus un viņu informāciju
+        "quotes": [], # Saglabās visus atrastos citātus
+        "tags": set() # Saglabās visus tagus, bez atkārtojumiem
     }
     }
-    page = 1 #Sāk ar pirmo lapu
-    seen_authors = set() #Saglabās autorus, kurus jau esam apstrādājuši, lai tie nedublētos
+    page = 1 # Sāk ar pirmo lapu
+    seen_authors = set() # Saglabās autorus, kurus jau esam apstrādājuši, lai tie nedublētos
 
     while True:
-        res = requests.get(f"{BASE_URL}/page/{page}/") #Nosūta pieprasījumu uz konkrēto lapu ar citātiem 
-        if res.status_code != 200: #Pārtrauc ciklu, ja atbildes kods nav 200
+        res = requests.get(f"{BASE_URL}/page/{page}/") # Nosūta pieprasījumu uz konkrēto lapu ar citātiem 
+        if res.status_code != 200: # Pārtrauc ciklu, ja atbildes kods nav 200
             break
-        soup = BeautifulSoup(res.content, "html.parser") #Izveido HTML dokumenta "lasāmu" versiju, ko Python var saprast un pārmeklēt
+        soup = BeautifulSoup(res.content, "html.parser") # Izveido HTML dokumenta "lasāmu" versiju, ko Python var saprast un pārmeklēt
         
-        for quote_div in soup.find_all("div", class_="quote"): #Atrod visus citātu blokus lapā – katrs citāts ir ievietots <div> ar klasi "quote"
-            text = quote_div.find("span", class_="text").text  #Iegūst citāta tekstu no <span> ar klasi "text"
-            author = quote_div.find("small", class_="author").text.strip() #Iegūst autora vārdu no <small> ar klasi "author" un noņem liekās atstarpes
-            tags = [tag.text.strip() for tag in quote_div.find_all("a", class_="tag")] #Atrod visus tagus šim citātam un saglabā tos kā sarakstu,noņem liekās atstarpes
+        for quote_div in soup.find_all("div", class_="quote"): # Atrod visus citātu blokus lapā – katrs citāts ir ievietots <div> ar klasi "quote"
+            text = quote_div.find("span", class_="text").text  # Iegūst citāta tekstu no <span> ar klasi "text"
+            author = quote_div.find("small", class_="author").text.strip() # Iegūst autora vārdu no <small> ar klasi "author" un noņem liekās atstarpes
+            tags = [tag.text.strip() for tag in quote_div.find_all("a", class_="tag")] # Atrod visus tagus šim citātam un saglabā tos kā sarakstu,noņem liekās atstarpes
             all_data["quotes"].append({
                 "text": text,
                 "author": author,
                 "tags": tags
-            }) #Saglabā šo citātu, autoru un tagus kopējā sarakstā "quotes"
-            all_data["tags"].update(tags) #Pievieno visus tagus kopējam tagu sarakstam, lai nav dublikātu
+            }) # Saglabā šo citātu, autoru un tagus kopējā sarakstā "quotes"
+            all_data["tags"].update(tags) # Pievieno visus tagus kopējam tagu sarakstam, lai nav dublikātu
 
-            if author not in seen_authors: #Ja šis autors vēl nav apskatīts
-                seen_authors.add(author) #pievieno autoru sarakstam, kas jau ir apskatīti, lai neskatās atkārtoti
-                link = quote_div.find("a", href=lambda href: href and href.startswith("/author/")) #Atrod saiti uz autora profila lapu
+            if author not in seen_authors: # Ja šis autors vēl nav apskatīts
+                seen_authors.add(author) # Pievieno autoru sarakstam, kas jau ir apskatīti, lai neskatās atkārtoti
+                link = quote_div.find("a", href=lambda href: href and href.startswith("/author/")) # Atrod saiti uz autora profila lapu
                 if link: # Ja saite eksistē...
                     author_page = requests.get(BASE_URL + link["href"]) # ...atver autora profila lapu
-                    if author_page.status_code == 200: #Ja lapa tika veiksmīgi ielādēta...
+                    if author_page.status_code == 200: # Ja lapa tika veiksmīgi ielādēta...
                         author_soup = BeautifulSoup(author_page.content, "html.parser") # Izveido viegli pārskatāmu HTML struktūru no lapas satura
                         try:
-                            birth_date = author_soup.find(class_="author-born-date").text
-                            birth_place = author_soup.find(class_="author-born-location").text
-                            description = author_soup.find("div", class_="author-description").text.strip()
-                            birth_date_obj = datetime.strptime(birth_date, "%B %d, %Y")
+                            birth_date = author_soup.find(class_="author-born-date").text # Atrod autora dzimšanas datumu
+                            birth_place = author_soup.find(class_="author-born-location").text # Atrod vietu, kur autors dzimis
+                            description = author_soup.find("div", class_="author-description").text.strip() # Atrod īsu aprakstu par autoru
+                            birth_date_obj = datetime.strptime(birth_date, "%B %d, %Y")  # Pārveido dzimšanas datumu no teksta uz datuma formātu
                             all_data["authors"][author] = {
                                 "birth_date": birth_date_obj,
                                 "birth_str": birth_date,
@@ -51,13 +51,14 @@ def preload_all_data(): #Funkcija, kas ielādē un saglabā visus datus no vietn
                                 "description": description
                             }
                         except Exception:
-                            continue
-        if not soup.find("li", class_="next"):
+                            continue # Ja rodas kāda kļūda, piemēram, kaut kas nav atrodams, tad vienkārši pāriet pie nākamā autora
+        if not soup.find("li", class_="next"): # Pārtrauc ciklu, ja nav "next" lapa
             break
-        page += 1
+        page += 1 # Ja ir nākamā lapa, tad palielina lapas numuru un turpina ciklu
 
-    all_data["tags"] = sorted(all_data["tags"])
-    return all_data
+    all_data["tags"] = sorted(all_data["tags"]) # Sakārto visus atrastos tagus alfabētiskā secībā un saglabā tos atpakaļ datu struktūrā
+# Pirms tam "tags" bija kopums (set), bet tagad tas kļūst par sarakstu (list), kur viss ir sakārtots
+    return all_data # Atgriež visus savāktos datus — citātus, autoru informāciju un tagus 
 
 # ==== Funkcijas, kas izmanto ielādētos datus ====
 
